@@ -1,0 +1,19 @@
+{
+  "name": "owsrv-talk",
+  "version": "0.0.1",
+  "description": "owserver talk module",
+  "main": "owtalk.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "owserver",
+    "node-red"
+  ],
+  "author": "vladimir",
+  "license": "MIT",
+  "dependencies": {
+    "net": "^1.0.2",
+    "network-byte-order": "^0.2.0"
+  }
+}
