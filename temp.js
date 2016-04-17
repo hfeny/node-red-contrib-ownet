@@ -1,10 +1,15 @@
-var ownet = require("./lib/ow").ownet;
-var conn = new ownet('rpi1.local',4304);
+var ownet = require('./lib/ow').ownet;
+var owserver = new ownet('rpi1.local',4304);
 
-var msg = conn.request('/',8,0);
+owserver.ls('/', function(data){
+    console.log(data);
+});
 
-//conn.request('/3A.C64F07000000/PIO.A',3,1);
+owserver.read('/28.97CA2E020000/temperature10', function(data){
+    console.log(data);
+});
 
-//var msg = conn.request('/3A.C64F07000000/PIO.A',3,0);
+owserver.write('/3A.C64F07000000/PIO.A', 0, function(data){
+    console.log(data);
+});
 
-console.log('msg', msg);
