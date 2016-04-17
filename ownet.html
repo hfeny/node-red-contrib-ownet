@@ -1,0 +1,145 @@
+
+<script type="text/javascript">
+    RED.nodes.registerType('owserver config',{
+        category: 'config',
+        defaults: {
+            host:		{value:"localhost", required:true},
+            port:		{value:"4304", required:true,validate:RED.validators.number()},
+        },
+        label: function() {
+            return this.host+":"+this.port;
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="owserver config">
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="icon-bookmark"></i> Host</label>
+        <input type="text" id="node-config-input-host" placeholder="localhost">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-port"><i class="fa fa-sign-in"></i> Port</label>
+        <input type="text" id="node-config-input-port" placeholder="4304">
+    </div>
+</script>
+
+<!-- end owserver config node -->
+
+<script type="text/javascript">
+    RED.nodes.registerType('ownet read',{
+        defaults: {
+            owserver:           { value:'', type:'owserver config'},
+            deviceID:			{ value:'' },
+            devicesIDList:		{ value:'' },
+            deviceProp:			{ value:'' },
+            devicePropList:		{ value:'' },
+            name: 				{ value:'' }
+        },
+        category:   'ownet',
+        color:      '#169cf5',
+        inputs:     1,
+        outputs:    1,
+        icon:	    'arrow-in.png',
+        align:	    'right',
+        label: function() { return this.name||this.topic||'ownet read'; },
+        oneditprepare: function() {
+            deviceIDListPopulate();
+            devicePropertyListPopulate($("#node-input-deviceID").val());
+            $("#node-input-devicesIDList").change( function() {
+                devicePropertyListPopulate($("#node-input-devicesIDList :selected").val());
+            });
+        },
+        oneditsave: function() {
+            var i = $("#node-input-devicesIDList :selected").val();
+            $("#node-input-deviceID").val(i);
+            var p = $("#node-input-devicePropList :selected").val();
+            $("#node-input-deviceProp").val(p);
+        }
+    });
+</script>
+
+<script>
+    function deviceIDListPopulate() {
+        $("#node-input-devicesIDList").empty();
+        $.getJSON("owfs-bridge/list-devs?host=localhost&port=4304").done(function(data) {
+            $.each(data["devices"], function(id,value) {
+                value = value.replace(new RegExp("/", "g"), ""); // remove leading "/"
+                $("#node-input-devicesIDList").append($('<option value="' + value + '">' + value + '</option>'));
+            });
+            var t = $("#node-input-deviceID").val();
+            $("#node-input-devicesIDList [value='" + t + "']").attr("selected", "selected");
+        });
+    };
+
+    function devicePropertyListPopulate(deviceID) {
+        var blacklist = new RegExp("/(?:address|crc8|errata|family|id|locator|r_[a-z]+)$");
+        $("#node-input-devicePropList").empty();
+        $.getJSON("owfs-bridge/list-devs?host=localhost&port=4304&device=" + deviceID).done(function(data) {
+            $.each(data["devices"], function(id,value) {
+                value = value.substr(16);
+                if(!value.match(blacklist)){
+                    $("#node-input-devicePropList").append($('<option value="' + value.substr(1) + '">' + value.substr(1) + '</option>'));
+                };
+            });
+            var t = $("#node-input-deviceProp").val();
+            $("#node-input-devicePropList [value='" + t + "']").attr("selected", "selected");
+        });
+    };
+</script>
+
+<script type="text/x-red" data-template-name="ownet read">
+    <div class="form-row">
+        <label for="node-input-owserver"><i class="fa fa-tag"></i> owserver</label>
+        <input type="text" id="node-input-owserver">
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-deviceID">
+    </div>
+    <div class="form-row">
+        <label for="node-input-devicesIDList"><i class="fa fa-square-o"></i> Device ID</label>
+        <select id="node-input-devicesIDList" style="width: 60%">
+		</select>
+    </div>
+    <div class="form-row">
+        <input type="hidden" id="node-input-deviceProp">
+    </div>
+    <div class="form-row">
+        <label for="node-input-devicePropList"><i class="fa fa-cog"></i> Property</label>
+        <select id="node-input-devicePropList" style="width: 60%">
+		</select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="ownet read">
+   <p>Read value from 1-wire device over owserver(owfs.org).</p>
+   <p>Output <b>msg.topic</b> containing owfs path,</p>
+   <p> include device id and property,</p>
+   <p> <b>ex</b> /28.97CA2E020000/temperature10</p>
+   <p><b>msg.payload</b> containing value as string.</p>
+</script>
+
+<!-- end ownet device read node -->
+
+<script type="text/javascript">
+    RED.nodes.registerType('ownet write',{
+        category: 'ownet',
+        color:"#f54616",
+        inputs:1,
+        outputs:1,
+        icon:	"arrow-in.png",
+        align:	"right"
+    });
+</script>
+
+<script type="text/x-red" data-template-name="ownet write">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<!-- end ownet device write node -->

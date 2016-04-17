@@ -1,3 +1,4 @@
+/*
 var ownet = require('./lib/ow').ownet;
 var owserver = new ownet('rpi1.local',4304);
 
@@ -10,6 +11,13 @@ owserver.read('/28.97CA2E020000/temperature10', function(data){
 });
 
 owserver.write('/3A.C64F07000000/PIO.A', 0, function(data){
+    console.log(data);
+});
+*/
+var owserver = require("./lib/ow");
+var ownet = new owserver.owserver('rpi1.local', 4304);
+
+ownet.ls('/', function(data){
     console.log(data);
 });
 
