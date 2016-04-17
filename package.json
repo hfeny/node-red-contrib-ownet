@@ -2,18 +2,16 @@
   "name": "node-red-contrib-ownet",
   "version": "0.0.1",
   "description": "node-red owserver talk module",
-  "main": "ownet.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "owserver",
-    "node-red"
-  ],
+  "keywords": [ "owserver", "node-red" ],
   "author": "Vladimir Volodin",
   "license": "MIT",
   "dependencies": {
     "net": "^1.0.2",
     "network-byte-order": "^0.2.0"
+  },
+  "node-red": {
+    "nodes": {
+      "ownet": "ownet.js"
+    }
   }
 }
