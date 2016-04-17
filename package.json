@@ -1,8 +1,8 @@
 {
-  "name": "owsrv-talk",
+  "name": "node-red-contrib-ownet",
   "version": "0.0.1",
-  "description": "owserver talk module",
-  "main": "owtalk.js",
+  "description": "node-red owserver talk module",
+  "main": "ownet.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,7 +10,7 @@
     "owserver",
     "node-red"
   ],
-  "author": "vladimir",
+  "author": "Vladimir Volodin",
   "license": "MIT",
   "dependencies": {
     "net": "^1.0.2",
