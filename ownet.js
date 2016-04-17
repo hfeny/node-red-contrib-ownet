@@ -1,5 +1,5 @@
 "use strict";
-var owserver = require("./lib/ow");
+var ownet = require('./lib/ow');
 
 module.exports = function(RED) {
     function owserverConfigNode(n) {
@@ -30,15 +30,13 @@ module.exports = function(RED) {
 // End ownet device write Node
 
     RED.httpAdmin.get("/ownet/ls",function(req,res) {
-        if (!req.query.host) { return res.status(400).send( {'error': "'Host' parameter in query string required !"}); }
-        else if (!req.query.port) { return res.status(400).send( {'error': "'Port' parameter in query string required !"}); }
-        else if(!req.query.device) { req.query.device=""; }
-        var owserver = new owserver.ownet('rpi1.local', 4304);
+        //if (!req.query.host) { return res.status(400).send( {'error': "'Host' parameter in query string required !"}); }
+        //else if (!req.query.port) { return res.status(400).send( {'error': "'Port' parameter in query string required !"}); }
+        //else if(!req.query.device) { req.query.device=""; }
+        var owserver = new ownet.owserver('rpi1.local', 4304);
         var node = this;
-        owserver.ls("/" + req.query.device, function(err, result) {
-            if(err) {
-                return res.send(err);
-            }
+        //owserver.ls("/" + req.query.device, function(result) {
+        owserver.ls("/", function(result) {
             res.send({ 'devices': result.sort() });
         });
     });
