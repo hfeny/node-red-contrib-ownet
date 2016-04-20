@@ -2,7 +2,11 @@
 //
 module.exports = function(RED) {
     "use strict";
+    var x;
     var ownet = require('./lib/ow');
+    var shost = {};
+    var sport = {};
+
 // Start owserver config Node
     function owserverConfigNode(n) {
         RED.nodes.createNode(this, n);
@@ -20,11 +24,18 @@ module.exports = function(RED) {
         if(this.server){
             this.host = this.server.host;
             this.port = this.server.port;
+
+            shost[this.host] = n.id;
+
             this.status({fill:"green",shape:"ring",text:this.host + ':' + this.port});
         } else {
             this.status({fill:"red",shape:"ring",text:"not configured"});
         }
         this.req = "/" + n.deviceID + "/" + n.deviceProp;
+
+        shost.hasOwnProperty(this.host);
+
+
 
         var a = this.host;
         var b = this.port;
@@ -32,23 +43,31 @@ module.exports = function(RED) {
 
         var node = this;
 
+
+        if(shost[node.host] === node.id ){
+            console.log('node id ' + node.id + ' host ' + node.host);
+        }
+        else {
+            console.log('no think ');
+        }
+
         RED.httpAdmin.get('/ownet/tt',function(req, res){
-            var p1, p2;
             var owServer = new ownet.owserver(a, b);
-            owServer.ls("/", function(dv) {
-                p1 = dv;
+            owServer.ls("/", function(r){
+                console.log('r' + r);
+                x = r.slice();
             });
-            owServer.ls("/", function(pr) {
-                p2 = pr;
-            });
-            res.send({ 'p1': p1 });
+            res.send({ 'x': x });
+            console.log('x'+ x);
+            //res.json(p2);
         });
 
         RED.httpAdmin.get('/ownet/ls',function(req, res){
             if(!req.query.path) { req.query.path=""; }
-            var owServer = new ownet.owserver(a, b);
+
+            var owServer = new ownet.owserver(node.host, node.port);
             owServer.ls("/" + req.query.path, function(result) {
-                node.warn(RED._(a + ' ' + b + ' ' + c)); // for debug
+                node.warn(RED._('node id: ' + node.id)); // for debug
                 res.send({ 'devices': result.sort() });
             });
 
@@ -92,10 +111,6 @@ module.exports = function(RED) {
     });
     */
 
-    RED.httpAdmin.get('/ownet/test',function(req, res){
-
-        res.send('Test:');
-    });
 
 
 };
