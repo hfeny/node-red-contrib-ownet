@@ -5,7 +5,6 @@
         defaults: {
             host: { value: 'localhost', required: true },
             port: { value: '4304', required: true, validate: RED.validators.number() },
-            path: { value: ''}
         },
         label: function(){
             return this.host + ':' + this.port;
@@ -48,11 +47,16 @@
         align:	    'right',
         label: function() { return this.name||this.topic||'ownet read'; },
         oneditprepare: function() {
+            $("#node-config-lookup-device").click(function(){
+
+            });
+        /*
             deviceIDListPopulate();
             devicePropertyListPopulate($("#node-input-deviceID").val());
             $("#node-input-devicesIDList").change( function() {
                 devicePropertyListPopulate($("#node-input-devicesIDList :selected").val());
             });
+        */
         },
         oneditsave: function() {
             var i = $("#node-input-devicesIDList :selected").val();
@@ -94,24 +98,18 @@
 
 <script type="text/x-red" data-template-name="ownet read">
     <div class="form-row">
-        <label for="node-input-owserver"><i class="fa fa-tag"></i> owserver</label>
+        <label for="node-input-owserver"><i class="fa fa-tag"></i> OWSERVER</label>
         <input type="text" id="node-input-owserver">
     </div>
     <div class="form-row">
-        <input type="text" id="node-input-deviceID">
+        <label for="node-input-deviceID"><i class="fa fa-cogs"></i> ROM Code</label>
+        <input type="text" id="node-input-deviceID" style="width: 55%">
+        <a id="node-config-lookup-device" class="btn"><i id="node-config-lookup-device-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
-        <label for="node-input-devicesIDList"><i class="fa fa-square-o"></i> Device ID</label>
-        <select id="node-input-devicesIDList" style="width: 60%">
-		</select>
-    </div>
-    <div class="form-row">
-        <input type="text" id="node-input-deviceProp">
-    </div>
-    <div class="form-row">
-        <label for="node-input-devicePropList"><i class="fa fa-cog"></i> Property</label>
-        <select id="node-input-devicePropList" style="width: 60%">
-		</select>
+        <label for="node-input-property"><i class="fa fa-sliders"></i> Property</label>
+        <input type="text" id="node-input-property" style="width: 55%">
+        <a id="node-config-lookup-property" class="btn"><i id="node-config-lookup-property-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
