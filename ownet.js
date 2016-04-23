@@ -18,44 +18,22 @@ module.exports = function(RED) {
 // Start ownet device read Node
     function ownetReadNode(n) {
         RED.nodes.createNode(this, n);
-        this.server = n.owserver;
-        this.config = RED.nodes.getNode(this.server);
+        this.config = RED.nodes.getNode(n.owserver);
         if(this.config){
             this.host = this.config.host;
             this.port = this.config.port;
-            shost[this.host] = this.id;
+            this.devpath = n.devpath;
+            this.subpath = n.subpath;
+            this.fullpath = this.devpath + this.subpath;
             this.status({fill:"green",shape:"ring",text:this.host + ':' + this.port});
         } else {
             this.status({fill:"red",shape:"ring",text:"not configured"});
         }
-        this.req = "/" + n.deviceID + "/" + n.deviceProp;
-
-       var node = this;
-
-        if(shost[node.host] === node.id ){
-            console.log('node id ' + node.id + ' host ' + node.host);
-        }
-        else {
-            console.log('no think ');
-        }
-
-
-        RED.httpAdmin.get('/ownet/ls',function(req, res){
-            if(!req.query.path) { req.query.path=""; }
-
-            console.log(RED._('node id: ' + node.id)); // for debug
-
-            var owServer = new ownet.owserver(node.host, node.port);
-            owServer.ls("/" + req.query.path, function(result) {
-                res.send({ 'devices': result.sort() });
-            });
-        });
-
-
+        var node = this;
         node.on('input', function (msg) {
             var owserver = new ownet.owserver(node.host, node.port);
-            owserver.read(node.req, function(res) {
-                msg.topic = n.deviceID;
+            owserver.read(node.fullpath, function(res) {
+                msg.topic = node.fullpath;
                 msg.payload = res;
                 node.send(msg);
             })
@@ -73,9 +51,24 @@ module.exports = function(RED) {
 
 // End ownet device write Node
 
+    RED.httpAdmin.get('/ownet/ls',function(req, res){
+        if(!req.query.path) { req.query.path="/"; }
+
+        console.log(RED._('xxx: ')); // for debug
+
+        var owServer = new ownet.owserver(req.query.host, req.query.port);
+        owServer.ls(req.query.path, function(list) {
+            res.json(list);
+        });
+    });
+
+
+
     RED.httpAdmin.get('/ownet/:id',function(req,res) {
         res.send('id' + req.query.id);
     });
+
+
     //node.log(RED._('info:') + node.host + ':' + node.port);
     //node.warn(RED._(node.host + ' ' + node.port + ' ' + node.req)); // for debug
 

@@ -21,10 +21,6 @@
         <label for="node-config-input-port"><i class="icon-tag"></i> Port</label>
         <input type="text" id="node-config-input-port" placeholder="4304">
     </div>
-    <div class="form-row">
-        <label for="node-config-input-path"><i class="icon-tag"></i> Path</label>
-        <input type="text" id="node-config-input-path">
-    </div>
 </script>
 
 <!-- end owserver config node -->
@@ -33,10 +29,8 @@
     RED.nodes.registerType('ownet read',{
         defaults: {
             owserver:           { value:'', type:'owserver'},
-            deviceID:			{ value:'' },
-            devicesIDList:		{ value:'' },
-            deviceProp:			{ value:'' },
-            devicePropList:		{ value:'' },
+            devpath:			{ value:'', required:true },
+            subpath:			{ value:'', required:true },
             name: 				{ value:'' }
         },
         category:   'ownet',
@@ -45,55 +39,55 @@
         outputs:    1,
         icon:	    'arrow-in.png',
         align:	    'right',
-        label: function() { return this.name||this.topic||'ownet read'; },
+        label: function() { return 'Read 1-wire device ' + this.devpath; },
         oneditprepare: function() {
-            $("#node-config-lookup-device").click(function(){
+            var server = RED.nodes.node(this.owserver);
+            try {
+                $("#node-input-devpath").autocomplete("destroy");
+                $("#node-input-subpath").autocomplete("destroy");
+            }
+            catch (err) {}
 
+            $("#node-input-lookup-devpath").click(function(){
+                $("#node-input-lookup-devpath").addClass('disabled');
+                $.getJSON('ownet/ls?host=' + server.host + '&port=' + server.port, function(data) {
+                    $("#node-input-lookup-devpath").removeClass('disabled');
+                    var devices;
+                    devices = data.slice();
+                    $("#node-input-devpath").autocomplete({
+                        source:devices,
+                        minLenght:0,
+                        close: function( event , ui ){
+                            $("#node-input-devpath").autocomplete("destroy");
+                        }
+                    }).autocomplete("search","/");
+                });
             });
-        /*
-            deviceIDListPopulate();
-            devicePropertyListPopulate($("#node-input-deviceID").val());
-            $("#node-input-devicesIDList").change( function() {
-                devicePropertyListPopulate($("#node-input-devicesIDList :selected").val());
+            $("#node-input-lookup-subpath").click(function(){
+                $("#node-input-lookup-subpath").addClass('disabled');
+                $.getJSON('ownet/ls?host=' + server.host + '&port=' + server.port + '&path=' + $("#node-input-devpath").val(),function(data) {
+                    $("#node-input-lookup-subpath").removeClass('disabled');
+                    var propers = [];
+                    var excluded_paths = new RegExp("/(?:address|crc8|errata|family|id|locator|r_[a-z]+)$");
+                    $.each(data, function(id,value) {
+                        value = value.substr(16);
+                        if(!value.match(excluded_paths)){
+                            propers.push(value);
+                        }
+                    });
+                    $("#node-input-subpath").autocomplete({
+                        source:propers,
+                        minLenght:0,
+                        close: function( event , ui ){
+                            $("#node-input-subpath").autocomplete("destroy");
+                        }
+                    }).autocomplete("search","/");
+                });
             });
-        */
         },
         oneditsave: function() {
-            var i = $("#node-input-devicesIDList :selected").val();
-            $("#node-input-deviceID").val(i);
-            var p = $("#node-input-devicePropList :selected").val();
-            $("#node-input-deviceProp").val(p);
         }
     });
-</script>
-
-<script>
-    function deviceIDListPopulate() {
-        $("#node-input-devicesIDList").empty();
-        $.getJSON("ownet/ls").done(function(data) {
-            $.each(data["devices"], function(id,value) {
-                value = value.replace(new RegExp("/", "g"), ""); // remove leading "/"
-                $("#node-input-devicesIDList").append($('<option value="' + value + '">' + value + '</option>'));
-            });
-            var t = $("#node-input-deviceID").val();
-            $("#node-input-devicesIDList [value='" + t + "']").attr("selected", "selected");
-        });
-    };
-
-    function devicePropertyListPopulate(deviceID) {
-        var blacklist = new RegExp("/(?:address|crc8|errata|family|id|locator|r_[a-z]+)$");
-        $("#node-input-devicePropList").empty();
-        $.getJSON("ownet/ls?path=" + deviceID).done(function(data) {
-            $.each(data["devices"], function(id,value) {
-                value = value.substr(16);
-                if(!value.match(blacklist)){
-                    $("#node-input-devicePropList").append($('<option value="' + value.substr(1) + '">' + value.substr(1) + '</option>'));
-                };
-            });
-            var t = $("#node-input-deviceProp").val();
-            $("#node-input-devicePropList [value='" + t + "']").attr("selected", "selected");
-        });
-    };
 </script>
 
 <script type="text/x-red" data-template-name="ownet read">
@@ -102,14 +96,14 @@
         <input type="text" id="node-input-owserver">
     </div>
     <div class="form-row">
-        <label for="node-input-deviceID"><i class="fa fa-cogs"></i> ROM Code</label>
-        <input type="text" id="node-input-deviceID" style="width: 55%">
-        <a id="node-config-lookup-device" class="btn"><i id="node-config-lookup-device-icon" class="fa fa-search"></i></a>
+        <label for="node-input-devpath"><i class="fa fa-cogs"></i> ROM Code</label>
+        <input type="text" id="node-input-devpath" style="width: 56%" data-i18n="[placeholder]devpath">
+        <a id="node-input-lookup-devpath" class="btn"><i id="node-input-lookup-devpath-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
-        <label for="node-input-property"><i class="fa fa-sliders"></i> Property</label>
-        <input type="text" id="node-input-property" style="width: 55%">
-        <a id="node-config-lookup-property" class="btn"><i id="node-config-lookup-property-icon" class="fa fa-search"></i></a>
+        <label for="node-input-subpath"><i class="fa fa-sliders"></i> Property</label>
+        <input type="text" id="node-input-subpath" style="width: 56%">
+        <a id="node-input-lookup-subpath" class="btn"><i id="node-input-lookup-subpath-icon" class="fa fa-search"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -146,3 +140,35 @@
 </script>
 
 <!-- end ownet device write node -->
+
+
+<script>
+/*
+    function deviceIDListPopulate() {
+        $("#node-input-devicesIDList").empty();
+        $.getJSON("ownet/ls").done(function(data) {
+            $.each(data["devices"], function(id,value) {
+                value = value.replace(new RegExp("/", "g"), ""); // remove leading "/"
+                $("#node-input-devicesIDList").append($('<option value="' + value + '">' + value + '</option>'));
+            });
+            var t = $("#node-input-deviceID").val();
+            $("#node-input-devicesIDList [value='" + t + "']").attr("selected", "selected");
+        });
+    };
+
+    function devicePropertyListPopulate(deviceID) {
+        var blacklist = new RegExp("/(?:address|crc8|errata|family|id|locator|r_[a-z]+)$");
+        $("#node-input-devicePropList").empty();
+        $.getJSON("ownet/ls?path=" + deviceID).done(function(data) {
+            $.each(data["devices"], function(id,value) {
+                value = value.substr(16);
+                if(!value.match(blacklist)){
+                    $("#node-input-devicePropList").append($('<option value="' + value.substr(1) + '">' + value.substr(1) + '</option>'));
+                };
+            });
+            var t = $("#node-input-deviceProp").val();
+            $("#node-input-devicePropList [value='" + t + "']").attr("selected", "selected");
+        });
+    };
+*/
+</script>
