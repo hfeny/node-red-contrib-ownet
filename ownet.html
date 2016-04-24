@@ -4,7 +4,7 @@
         category: 'config',
         defaults: {
             host: { value: 'localhost', required: true },
-            port: { value: '4304', required: true, validate: RED.validators.number() },
+            port: { value: '4304', required: true, validate: RED.validators.number() }
         },
         label: function(){
             return this.host + ':' + this.port;
@@ -29,8 +29,6 @@
     RED.nodes.registerType('ownet-read',{
         defaults: {
             owserver:           { value:'', type: 'owserver' },
-            owserverhost:       { value:'' },
-            owserverport:       { value:'' },
             path:			    { value:'', required:true },
             subpath:			{ value:'', required:true },
             name: 				{ value:'' }
@@ -43,15 +41,19 @@
         align:	    'right',
         label: function() { return 'Read 1-wire device ' || this.name; },
         oneditprepare: function() {
-            var server = RED.nodes.node(this.owserver);
+            var server;
             try {
                 $("#node-input-path").autocomplete("destroy");
                 $("#node-input-subpath").autocomplete("destroy");
             }
             catch (err) {}
 
+            $("#node-input-owserver").change( function(){
+                server = RED.nodes.node($("#node-input-owserver").val());
+                if(server){ console.log('server path ' + server.host + ':' + server.port); }
+
+            });
             $("#node-input-lookup-path").click(function(){
-                //var server = RED.nodes.node(this.owserver);
                 $("#node-input-lookup-path").addClass('disabled');
                 $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
                 $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
@@ -66,13 +68,11 @@
                             $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
                             $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
                             $("#node-input-lookup-path").removeClass('disabled');
-
                         }
                     }).autocomplete("search","/");
                 });
             });
             $("#node-input-lookup-subpath").click(function(){
-                //var server = RED.nodes.node(this.owserver);
                 $("#node-input-lookup-subpath").addClass('disabled');
                 $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + $("#node-input-path").val(),function(data) {
                     $("#node-input-lookup-subpath").removeClass('disabled');
@@ -88,8 +88,7 @@
                 });
             });
         },
-        oneditsave: function() {
-        }
+        oneditsave: function() {}
     });
 </script>
 
@@ -97,14 +96,6 @@
     <div class="form-row">
         <label for="node-input-owserver"><i class="fa fa-server"></i> OWSERVER</label>
         <input type="text" id="node-input-owserver">
-    </div>
-    <div class="form-row">
-        <label for="node-input-owserverhost"><i class="fa fa-server"></i> host</label>
-        <input type="text" id="node-input-owserverhost">
-    </div>
-    <div class="form-row">
-        <label for="node-input-owserverport"><i class="fa fa-server"></i> port</label>
-        <input type="text" id="node-input-owserverport">
     </div>
     <div class="form-row">
         <label for="node-input-path"><i class="fa fa-cogs"></i> ROM Code</label>
