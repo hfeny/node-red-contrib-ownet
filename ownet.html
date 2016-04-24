@@ -1,3 +1,14 @@
+<!-- start owserver config node -->
+<script type="text/x-red" data-template-name="owserver">
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="fa fa-server"></i> Host</label>
+        <input type="text" id="node-config-input-host" placeholder="localhost">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-port"><i class="fa fa-plug"></i> Port</label>
+        <input type="text" id="node-config-input-port" placeholder="4304">
+    </div>
+</script>
 
 <script type="text/javascript">
     RED.nodes.registerType('owserver',{
@@ -11,87 +22,8 @@
         }
     });
 </script>
-
-<script type="text/x-red" data-template-name="owserver">
-    <div class="form-row">
-        <label for="node-config-input-host"><i class="fa fa-server"></i> Host</label>
-        <input type="text" id="node-config-input-host" placeholder="localhost">
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-port"><i class="fa fa-plug"></i> Port</label>
-        <input type="text" id="node-config-input-port" placeholder="4304">
-    </div>
-</script>
-
 <!-- end owserver config node -->
-
-<script type="text/javascript">
-    RED.nodes.registerType('ownet-read',{
-        defaults: {
-            owserver:           { value:'', type: 'owserver' },
-            path:			    { value:'', required:true },
-            subpath:			{ value:'', required:true },
-            name: 				{ value:'' }
-        },
-        category:   'ownet',
-        color:      '#169cf5',
-        inputs:     1,
-        outputs:    1,
-        icon:	    'arrow-in.png',
-        align:	    'right',
-        label: function() { return 'Read 1-wire device ' || this.name; },
-        oneditprepare: function() {
-            var server;
-            try {
-                $("#node-input-path").autocomplete("destroy");
-                $("#node-input-subpath").autocomplete("destroy");
-            }
-            catch (err) {}
-
-            $("#node-input-owserver").change( function(){
-                server = RED.nodes.node($("#node-input-owserver").val());
-                if(server){ console.log('server path ' + server.host + ':' + server.port); }
-
-            });
-            $("#node-input-lookup-path").click(function(){
-                $("#node-input-lookup-path").addClass('disabled');
-                $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
-                $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
-                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/', function(data) {
-                    var temp = [];
-                    temp = data.slice();
-                    $("#node-input-path").autocomplete({
-                        source:temp,
-                        minLenght:0,
-                        close: function( event , ui ){
-                            $("#node-input-path").autocomplete("destroy");
-                            $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
-                            $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
-                            $("#node-input-lookup-path").removeClass('disabled');
-                        }
-                    }).autocomplete("search","/");
-                });
-            });
-            $("#node-input-lookup-subpath").click(function(){
-                $("#node-input-lookup-subpath").addClass('disabled');
-                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + $("#node-input-path").val(),function(data) {
-                    $("#node-input-lookup-subpath").removeClass('disabled');
-                    var temp = [];
-                    temp = data.slice();
-                    $("#node-input-subpath").autocomplete({
-                        source:temp,
-                        minLenght:0,
-                        close: function( event , ui ){
-                            $("#node-input-subpath").autocomplete("destroy");
-                        }
-                    }).autocomplete("search","/");
-                });
-            });
-        },
-        oneditsave: function() {}
-    });
-</script>
-
+<!-- start owserver read node -->
 <script type="text/x-red" data-template-name="ownet-read">
     <div class="form-row">
         <label for="node-input-owserver"><i class="fa fa-server"></i> OWSERVER</label>
@@ -117,28 +49,186 @@
    <p>Read value from 1-wire device over owserver(owfs.org).</p>
    <p>Output <b>msg.topic</b> containing owfs path,</p>
    <p> include device id and property,</p>
-   <p> <b>ex</b> /28.97CA2E020000/temperature10</p>
+   <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
    <p><b>msg.payload</b> containing value as string.</p>
 </script>
 
-<!-- end ownet device read node -->
-
 <script type="text/javascript">
-    RED.nodes.registerType('ownet-write',{
-        category: 'ownet',
-        color:"#f54616",
-        inputs:1,
-        outputs:1,
-        icon:	"arrow-in.png",
-        align:	"right"
+    RED.nodes.registerType('ownet-read',{
+        defaults: {
+            owserver:           { value:'', type: 'owserver' },
+            path:			    { value:'', required:true },
+            subpath:			{ value:'', required:true },
+            name: 				{ value:'' }
+        },
+        category:   'ownet',
+        color:      '#169cf5',
+        inputs:     1,
+        outputs:    1,
+        icon:	    'arrow-in.png',
+        align:	    'right',
+        label: function() { return 'Read 1-wire device ' || this.name; },
+        oneditprepare: function() {
+            var server;
+            try {
+                $("#node-input-path").autocomplete("destroy");
+                $("#node-input-subpath").autocomplete("destroy");
+            }
+            catch (err){
+            }
+
+            $("#node-input-owserver").change( function(){
+                var serverConfigId = $("#node-input-owserver").val();
+                server = RED.nodes.node(serverConfigId);
+            });
+
+            $("#node-input-lookup-path").click(function(){
+                $("#node-input-lookup-path").addClass('disabled');
+                $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
+                $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/', function(data) {
+                    var temp = [];
+                    temp = data.slice();
+                    $("#node-input-path").autocomplete({
+                        source:temp,
+                        minLenght:0,
+                        close: function( event , ui ){
+                            $("#node-input-path").autocomplete("destroy");
+                            $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
+                            $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
+                            $("#node-input-lookup-path").removeClass('disabled');
+                        }
+                    }).autocomplete("search","/");
+                });
+            });
+
+            $("#node-input-lookup-subpath").click(function(){
+                var tempPath = $("#node-input-path").val();
+                $("#node-input-lookup-subpath").addClass('disabled');
+                $("#node-input-lookup-subpath-icon").removeClass('fa fa-ellipsis-h');
+                $("#node-input-lookup-subpath-icon").addClass('fa fa-pencil');
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + tempPath,function(data) {
+                    $("#node-input-lookup-subpath").removeClass('disabled');
+                    var temp = [];
+                    temp = data.slice();
+                    $("#node-input-subpath").autocomplete({
+                        source:temp,
+                        minLenght:0,
+                        close: function( event , ui ){
+                            $("#node-input-subpath").autocomplete("destroy");
+                            $("#node-input-lookup-subpath-icon").removeClass('fa fa-pencil');
+                            $("#node-input-lookup-subpath-icon").addClass('fa fa-ellipsis-h');
+                            $("#node-input-lookup-subpath").removeClass('disabled');
+                        }
+                    }).autocomplete("search","/");
+                });
+            });
+        }
     });
 </script>
-
+<!-- end owserver read node -->
+<!-- start owserver write node -->
 <script type="text/x-red" data-template-name="ownet-write">
+    <div class="form-row">
+        <label for="node-input-owserver"><i class="fa fa-server"></i> OWSERVER</label>
+        <input type="text" id="node-input-owserver">
+    </div>
+    <div class="form-row">
+        <label for="node-input-path"><i class="fa fa-cogs"></i> ROM Code</label>
+        <input type="text" id="node-input-path" style="width: 56%">
+        <a id="node-input-lookup-path" class="btn"><i id="node-input-lookup-path-icon" class="fa fa-ellipsis-h"></i></a>
+    </div>
+    <div class="form-row">
+        <label for="node-input-subpath"><i class="fa fa-sliders"></i> Property</label>
+        <input type="text" id="node-input-subpath" style="width: 56%">
+        <a id="node-input-lookup-subpath" class="btn"><i id="node-input-lookup-subpath-icon" class="fa fa-ellipsis-h"></i></a>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
-<!-- end ownet device write node -->
+<script type="text/x-red" data-help-name="ownet-read">
+   <p>Write value to 1-wire device over owserver(owfs.org).</p>
+   <p>Output <b>msg.topic</b> containing owfs path,</p>
+   <p> include device id and property,</p>
+   <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
+   <p><b>msg.payload</b> result of operation,</p>
+   <p>if this < 0 , operation failed.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('ownet-write',{
+        defaults: {
+            owserver:           { value:'', type: 'owserver' },
+            path:			    { value:'', required:true },
+            subpath:			{ value:'', required:true },
+            name: 				{ value:'' }
+        },
+        category:   'ownet',
+        color:      '#f54616',
+        inputs:     1,
+        outputs:    1,
+        icon:	    'arrow-in.png',
+        align:	    'right',
+        label: function() { return 'Write 1-wire device ' || this.name; },
+        oneditprepare: function(){
+            var server;
+            try {
+                $("#node-input-path").autocomplete("destroy");
+                $("#node-input-subpath").autocomplete("destroy");
+            }
+            catch (err){
+            }
+
+            $("#node-input-owserver").change( function(){
+                var serverConfigId = $("#node-input-owserver").val();
+                server = RED.nodes.node(serverConfigId);
+            });
+
+            $("#node-input-lookup-path").click(function(){
+                $("#node-input-lookup-path").addClass('disabled');
+                $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
+                $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/', function(data) {
+                    var temp = [];
+                    temp = data.slice();
+                    $("#node-input-path").autocomplete({
+                        source:temp,
+                        minLenght:0,
+                        close: function( event , ui ){
+                            $("#node-input-path").autocomplete("destroy");
+                            $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
+                            $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
+                            $("#node-input-lookup-path").removeClass('disabled');
+                        }
+                    }).autocomplete("search","/");
+                });
+            });
+
+            $("#node-input-lookup-subpath").click(function(){
+                var tempPath = $("#node-input-path").val();
+                $("#node-input-lookup-subpath").addClass('disabled');
+                $("#node-input-lookup-subpath-icon").removeClass('fa fa-ellipsis-h');
+                $("#node-input-lookup-subpath-icon").addClass('fa fa-pencil');
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + tempPath,function(data) {
+                    $("#node-input-lookup-subpath").removeClass('disabled');
+                    var temp = [];
+                    temp = data.slice();
+                    $("#node-input-subpath").autocomplete({
+                        source:temp,
+                        minLenght:0,
+                        close: function( event , ui ){
+                            $("#node-input-subpath").autocomplete("destroy");
+                            $("#node-input-lookup-subpath-icon").removeClass('fa fa-pencil');
+                            $("#node-input-lookup-subpath-icon").addClass('fa fa-ellipsis-h');
+                            $("#node-input-lookup-subpath").removeClass('disabled');
+                        }
+                    }).autocomplete("search","/");
+                });
+            });
+        }
+    });
+</script>
+<!-- end owserver write node -->
