@@ -14,11 +14,11 @@
 
 <script type="text/x-red" data-template-name="owserver">
     <div class="form-row">
-        <label for="node-config-input-host"><i class="icon-bookmark"></i> Host</label>
+        <label for="node-config-input-host"><i class="fa fa-server"></i> Host</label>
         <input type="text" id="node-config-input-host" placeholder="localhost">
     </div>
     <div class="form-row">
-        <label for="node-config-input-port"><i class="icon-tag"></i> Port</label>
+        <label for="node-config-input-port"><i class="fa fa-plug"></i> Port</label>
         <input type="text" id="node-config-input-port" placeholder="4304">
     </div>
 </script>
@@ -26,10 +26,12 @@
 <!-- end owserver config node -->
 
 <script type="text/javascript">
-    RED.nodes.registerType('ownet read',{
+    RED.nodes.registerType('ownet-read',{
         defaults: {
-            owserver:           { value:'', type:'owserver'},
-            devpath:			{ value:'', required:true },
+            owserver:           { value:'', type: 'owserver' },
+            owserverhost:       { value:'' },
+            owserverport:       { value:'' },
+            path:			    { value:'', required:true },
             subpath:			{ value:'', required:true },
             name: 				{ value:'' }
         },
@@ -39,44 +41,45 @@
         outputs:    1,
         icon:	    'arrow-in.png',
         align:	    'right',
-        label: function() { return 'Read 1-wire device ' + this.devpath; },
+        label: function() { return 'Read 1-wire device ' || this.name; },
         oneditprepare: function() {
             var server = RED.nodes.node(this.owserver);
             try {
-                $("#node-input-devpath").autocomplete("destroy");
+                $("#node-input-path").autocomplete("destroy");
                 $("#node-input-subpath").autocomplete("destroy");
             }
             catch (err) {}
 
-            $("#node-input-lookup-devpath").click(function(){
-                $("#node-input-lookup-devpath").addClass('disabled');
-                $.getJSON('ownet/ls?host=' + server.host + '&port=' + server.port, function(data) {
-                    $("#node-input-lookup-devpath").removeClass('disabled');
-                    var devices;
-                    devices = data.slice();
-                    $("#node-input-devpath").autocomplete({
-                        source:devices,
+            $("#node-input-lookup-path").click(function(){
+                //var server = RED.nodes.node(this.owserver);
+                $("#node-input-lookup-path").addClass('disabled');
+                $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
+                $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/', function(data) {
+                    var temp = [];
+                    temp = data.slice();
+                    $("#node-input-path").autocomplete({
+                        source:temp,
                         minLenght:0,
                         close: function( event , ui ){
-                            $("#node-input-devpath").autocomplete("destroy");
+                            $("#node-input-path").autocomplete("destroy");
+                            $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
+                            $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
+                            $("#node-input-lookup-path").removeClass('disabled');
+
                         }
                     }).autocomplete("search","/");
                 });
             });
             $("#node-input-lookup-subpath").click(function(){
+                //var server = RED.nodes.node(this.owserver);
                 $("#node-input-lookup-subpath").addClass('disabled');
-                $.getJSON('ownet/ls?host=' + server.host + '&port=' + server.port + '&path=' + $("#node-input-devpath").val(),function(data) {
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + $("#node-input-path").val(),function(data) {
                     $("#node-input-lookup-subpath").removeClass('disabled');
-                    var propers = [];
-                    var excluded_paths = new RegExp("/(?:address|crc8|errata|family|id|locator|r_[a-z]+)$");
-                    $.each(data, function(id,value) {
-                        value = value.substr(16);
-                        if(!value.match(excluded_paths)){
-                            propers.push(value);
-                        }
-                    });
+                    var temp = [];
+                    temp = data.slice();
                     $("#node-input-subpath").autocomplete({
-                        source:propers,
+                        source:temp,
                         minLenght:0,
                         close: function( event , ui ){
                             $("#node-input-subpath").autocomplete("destroy");
@@ -90,20 +93,28 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="ownet read">
+<script type="text/x-red" data-template-name="ownet-read">
     <div class="form-row">
-        <label for="node-input-owserver"><i class="fa fa-tag"></i> OWSERVER</label>
+        <label for="node-input-owserver"><i class="fa fa-server"></i> OWSERVER</label>
         <input type="text" id="node-input-owserver">
     </div>
     <div class="form-row">
-        <label for="node-input-devpath"><i class="fa fa-cogs"></i> ROM Code</label>
-        <input type="text" id="node-input-devpath" style="width: 56%" data-i18n="[placeholder]devpath">
-        <a id="node-input-lookup-devpath" class="btn"><i id="node-input-lookup-devpath-icon" class="fa fa-search"></i></a>
+        <label for="node-input-owserverhost"><i class="fa fa-server"></i> host</label>
+        <input type="text" id="node-input-owserverhost">
+    </div>
+    <div class="form-row">
+        <label for="node-input-owserverport"><i class="fa fa-server"></i> port</label>
+        <input type="text" id="node-input-owserverport">
+    </div>
+    <div class="form-row">
+        <label for="node-input-path"><i class="fa fa-cogs"></i> ROM Code</label>
+        <input type="text" id="node-input-path" style="width: 56%">
+        <a id="node-input-lookup-path" class="btn"><i id="node-input-lookup-path-icon" class="fa fa-ellipsis-h"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-subpath"><i class="fa fa-sliders"></i> Property</label>
         <input type="text" id="node-input-subpath" style="width: 56%">
-        <a id="node-input-lookup-subpath" class="btn"><i id="node-input-lookup-subpath-icon" class="fa fa-search"></i></a>
+        <a id="node-input-lookup-subpath" class="btn"><i id="node-input-lookup-subpath-icon" class="fa fa-ellipsis-h"></i></a>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -111,7 +122,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="ownet read">
+<script type="text/x-red" data-help-name="ownet-read">
    <p>Read value from 1-wire device over owserver(owfs.org).</p>
    <p>Output <b>msg.topic</b> containing owfs path,</p>
    <p> include device id and property,</p>
@@ -122,7 +133,7 @@
 <!-- end ownet device read node -->
 
 <script type="text/javascript">
-    RED.nodes.registerType('ownet write',{
+    RED.nodes.registerType('ownet-write',{
         category: 'ownet',
         color:"#f54616",
         inputs:1,
@@ -132,7 +143,7 @@
     });
 </script>
 
-<script type="text/x-red" data-template-name="ownet write">
+<script type="text/x-red" data-template-name="ownet-write">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -140,35 +151,3 @@
 </script>
 
 <!-- end ownet device write node -->
-
-
-<script>
-/*
-    function deviceIDListPopulate() {
-        $("#node-input-devicesIDList").empty();
-        $.getJSON("ownet/ls").done(function(data) {
-            $.each(data["devices"], function(id,value) {
-                value = value.replace(new RegExp("/", "g"), ""); // remove leading "/"
-                $("#node-input-devicesIDList").append($('<option value="' + value + '">' + value + '</option>'));
-            });
-            var t = $("#node-input-deviceID").val();
-            $("#node-input-devicesIDList [value='" + t + "']").attr("selected", "selected");
-        });
-    };
-
-    function devicePropertyListPopulate(deviceID) {
-        var blacklist = new RegExp("/(?:address|crc8|errata|family|id|locator|r_[a-z]+)$");
-        $("#node-input-devicePropList").empty();
-        $.getJSON("ownet/ls?path=" + deviceID).done(function(data) {
-            $.each(data["devices"], function(id,value) {
-                value = value.substr(16);
-                if(!value.match(blacklist)){
-                    $("#node-input-devicePropList").append($('<option value="' + value.substr(1) + '">' + value.substr(1) + '</option>'));
-                };
-            });
-            var t = $("#node-input-deviceProp").val();
-            $("#node-input-devicePropList [value='" + t + "']").attr("selected", "selected");
-        });
-    };
-*/
-</script>

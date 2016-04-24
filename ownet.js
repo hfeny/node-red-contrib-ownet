@@ -3,9 +3,7 @@
 module.exports = function(RED) {
     "use strict";
     var ownet = require('./lib/ow');
-
-    var shost = {};
-
+//
 // Start owserver config Node
     function owserverConfigNode(n) {
         RED.nodes.createNode(this, n);
@@ -22,24 +20,23 @@ module.exports = function(RED) {
         if(this.config){
             this.host = this.config.host;
             this.port = this.config.port;
-            this.devpath = n.devpath;
+            this.path = n.path;
             this.subpath = n.subpath;
-            this.fullpath = this.devpath + this.subpath;
-            this.status({fill:"green",shape:"ring",text:this.host + ':' + this.port});
+            this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port + this.path + this.subpath});
         } else {
-            this.status({fill:"red",shape:"ring",text:"not configured"});
+            this.status({fill:"red",shape:"dot",text:"owserver not set"});
         }
         var node = this;
         node.on('input', function (msg) {
             var owserver = new ownet.owserver(node.host, node.port);
-            owserver.read(node.fullpath, function(res) {
-                msg.topic = node.fullpath;
+            owserver.read(node.path + node.subpath, function(res) {
+                msg.topic = node.path + node.subpath;
                 msg.payload = res;
                 node.send(msg);
             })
         });
     }
-    RED.nodes.registerType('ownet read',ownetReadNode);
+    RED.nodes.registerType('ownet-read',ownetReadNode);
 // End ownet device read Node
 
     function ownetWriteNode(n) {
@@ -47,45 +44,32 @@ module.exports = function(RED) {
         // node-specific code goes here
 
     }
-    RED.nodes.registerType('ownet write',ownetWriteNode);
+    RED.nodes.registerType('ownet-write',ownetWriteNode);
 
 // End ownet device write Node
 
-    RED.httpAdmin.get('/ownet/ls',function(req, res){
-        if(!req.query.path) { req.query.path="/"; }
-
-        console.log(RED._('xxx: ')); // for debug
-
-        var owServer = new ownet.owserver(req.query.host, req.query.port);
-        owServer.ls(req.query.path, function(list) {
+    RED.httpAdmin.get('/ownet/ls/:host/:port/*',function(req,res) {
+        var server = new ownet.owserver(req.params.host, req.params.port);
+        if(!req.params[0]){ req.params[0] = '/'; };
+        server.ls(req.params[0], function(data){
+            var list = [];
+            data = data.sort().slice();
+            var excluded_paths = new RegExp("/(?:address|crc8|errata|family|id|locator|scratchpad|r_[a-z]+)$");
+            for( var i = 0; i < data.length; i++ ){
+                if(data[i].length > 16){
+                    if(!data[i].slice(16).match(excluded_paths)){
+                        list.push(data[i].slice(16));
+                    }
+                }
+                else {
+                    list.push(data[i]);
+                }
+            }
             res.json(list);
         });
     });
-
-
-
-    RED.httpAdmin.get('/ownet/:id',function(req,res) {
-        res.send('id' + req.query.id);
-    });
-
-
-    //node.log(RED._('info:') + node.host + ':' + node.port);
-    //node.warn(RED._(node.host + ' ' + node.port + ' ' + node.req)); // for debug
-
-    /*
-    RED.httpAdmin.get('/ownet/ls',function(req,res) {
-        if (!req.query.host) { return res.status(400).send( {'error': "'Host' parameter in query string required !"}); }
-        else if (!req.query.port) { return res.status(400).send( {'error': "'Port' parameter in query string required !"}); }
-        else if(!req.query.device) { req.query.device=""; }
-        var owserver = new ownet.owserver(req.query.host, req.query.port);
-        //var node = this;
-        owserver.ls("/" + req.query.device, function(result) {
-        //owserver.ls('/', function(result) {
-            res.send({ 'devices': result.sort() });
-        });
-    });
-    */
-
-
-
 };
+
+//node.log(RED._('info:') + node.host + ':' + node.port);
+//node.warn(RED._(node.host + ' ' + node.port + ' ' + node.req)); // for debug
+
