@@ -1,8 +1,8 @@
 {
   "name": "node-red-contrib-ownet",
   "version": "0.0.1",
-  "description": "node-red owserver talk module",
-  "keywords": [ "owserver", "node-red" ],
+  "description": "Node-RED nodes for talk with owserver",
+  "keywords": [ "owserver", "node-red", "1-wire" ],
   "author": "Vladimir Volodin",
   "license": "MIT",
   "dependencies": {
