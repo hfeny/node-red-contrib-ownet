@@ -38,14 +38,31 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType('ownet-read',ownetReadNode);
 // End ownet device read Node
-
+// Start ownet device write Node
     function ownetWriteNode(n) {
         RED.nodes.createNode(this,n);
-        // node-specific code goes here
-
+        this.config = RED.nodes.getNode(n.owserver);
+        if(this.config){
+            this.host = this.config.host;
+            this.port = this.config.port;
+            this.path = n.path;
+            this.subpath = n.subpath;
+            this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port + this.path + this.subpath});
+        } else {
+            this.status({fill:"red",shape:"dot",text:"owserver not set"});
+        }
+        var node = this;
+        node.on('input', function (msg) {
+            var owserver = new ownet.owserver(node.host, node.port);
+            var value = msg.payload;
+            owserver.write(node.path + node.subpath, value, function(res) {
+                msg.topic = node.path + node.subpath;
+                msg.payload = res;
+                node.send(msg);
+            })
+        });
     }
     RED.nodes.registerType('ownet-write',ownetWriteNode);
-
 // End ownet device write Node
 
     RED.httpAdmin.get('/ownet/ls/:host/:port/*',function(req,res) {
@@ -69,7 +86,4 @@ module.exports = function(RED) {
         });
     });
 };
-
-//node.log(RED._('info:') + node.host + ':' + node.port);
-//node.warn(RED._(node.host + ' ' + node.port + ' ' + node.req)); // for debug
 
