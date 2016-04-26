@@ -5,13 +5,8 @@
 *.pid
 *.gz
 
-pids
 logs
 results
 
-owfs
-
 node_modules
 npm-debug.log
-
-temp.js
