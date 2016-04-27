@@ -22,7 +22,7 @@ module.exports = function(RED) {
             this.port = this.config.port;
             this.path = n.path;
             this.subpath = n.subpath;
-            this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port + this.path + this.subpath});
+            this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
         } else {
             this.status({fill:"red",shape:"dot",text:"owserver not set"});
         }
@@ -47,7 +47,7 @@ module.exports = function(RED) {
             this.port = this.config.port;
             this.path = n.path;
             this.subpath = n.subpath;
-            this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port + this.path + this.subpath});
+            this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
         } else {
             this.status({fill:"red",shape:"dot",text:"owserver not set"});
         }

@@ -67,7 +67,7 @@
         outputs:    1,
         icon:	    'arrow-in.png',
         align:	    'right',
-        label: function() { return 'Read 1-wire device ' || this.name; },
+        label: function() { return this.name || (this.path + this.subpath); },
         oneditprepare: function() {
             var server;
             try {
@@ -172,7 +172,7 @@
         outputs:    1,
         icon:	    'arrow-in.png',
         align:	    'right',
-        label: function() { return 'Write 1-wire device ' || this.name; },
+        label: function() { return this.name || (this.path + this.subpath); },
         oneditprepare: function(){
             var server;
             try {
