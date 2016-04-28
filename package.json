@@ -5,6 +5,11 @@
   "keywords": [ "owserver", "node-red", "1-wire" ],
   "author": "Vladimir Volodin",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hfeny/node-red-contrib-ownet.git"
+  },
+  "homepage": "https://github.com/hfeny/node-red-contrib-ownet",
   "dependencies": {
     "net": "^1.0.2",
     "network-byte-order": "^0.2.0"
