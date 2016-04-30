@@ -24,7 +24,7 @@ module.exports = function(RED) {
             this.subpath = n.subpath;
             this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
         } else {
-            this.status({fill:"red",shape:"dot",text:"owserver not set"});
+            this.status({fill:"red",shape:"dot",text:"server not set"});
         }
         var node = this;
         node.on('input', function (msg) {
@@ -49,7 +49,7 @@ module.exports = function(RED) {
             this.subpath = n.subpath;
             this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
         } else {
-            this.status({fill:"red",shape:"dot",text:"owserver not set"});
+            this.status({fill:"red",shape:"dot",text:"server not set"});
         }
         var node = this;
         node.on('input', function (msg) {
@@ -57,7 +57,11 @@ module.exports = function(RED) {
             var value = msg.payload;
             owserver.write(node.path + node.subpath, value, function(res) {
                 msg.topic = node.path + node.subpath;
-                msg.payload = res;
+                if(res < 0){
+                    msg.payload = false;
+                } else {
+                    msg.payload = true;
+                }
                 node.send(msg);
             })
         });
@@ -67,19 +71,25 @@ module.exports = function(RED) {
 
     RED.httpAdmin.get('/ownet/ls/:host/:port/*',function(req,res) {
         var server = new ownet.owserver(req.params.host, req.params.port);
-        if(!req.params[0]){ req.params[0] = '/'; };
+        if(!req.params[0]){ req.params[0] = '/'; }
         server.ls(req.params[0], function(data){
             var list = [];
-            data = data.sort().slice();
-            var excluded_paths = new RegExp("/(?:address|crc8|errata|family|id|locator|scratchpad|r_[a-z]+)$");
-            for( var i = 0; i < data.length; i++ ){
-                if(data[i].length > 16){
-                    if(!data[i].slice(16).match(excluded_paths)){
-                        list.push(data[i].slice(16));
+            if(data[0].slice(0,5) == 'Error'){
+                list.push(data[0]);
+                //res.json(list);
+                //return ;
+            } else {
+                data = data.sort().slice();
+                var excluded_subpaths = new RegExp("/(?:address|crc8|errata|family|id|locator|scratchpad|r_[a-z]+)$");
+                for( var i = 0; i < data.length; i++ ){
+                    if(data[i].length > 16){
+                        if(!data[i].slice(16).match(excluded_subpaths)){
+                            list.push(data[i].slice(16));
+                        }
                     }
-                }
-                else {
-                    list.push(data[i]);
+                    else {
+                        list.push(data[i]);
+                    }
                 }
             }
             res.json(list);

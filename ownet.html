@@ -31,13 +31,11 @@
     </div>
     <div class="form-row">
         <label for="node-input-path"><i class="fa fa-cogs"></i> ROM Code</label>
-        <input type="text" id="node-input-path" style="width: 56%">
-        <a id="node-input-lookup-path" class="btn"><i id="node-input-lookup-path-icon" class="fa fa-ellipsis-h"></i></a>
+        <input type="text" id="node-input-path" placeholder="Click for lookup">
     </div>
     <div class="form-row">
         <label for="node-input-subpath"><i class="fa fa-sliders"></i> Property</label>
-        <input type="text" id="node-input-subpath" style="width: 56%">
-        <a id="node-input-lookup-subpath" class="btn"><i id="node-input-lookup-subpath-icon" class="fa fa-ellipsis-h"></i></a>
+        <input type="text" id="node-input-subpath" placeholder="Select property">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -57,7 +55,7 @@
     RED.nodes.registerType('ownet-read',{
         defaults: {
             owserver:           { value:'', type: 'owserver' },
-            path:			    { value:'', required:true },
+            path:			    { value:'/', required:true },
             subpath:			{ value:'', required:true },
             name: 				{ value:'' }
         },
@@ -70,57 +68,40 @@
         label: function() { return this.name || (this.path + this.subpath); },
         oneditprepare: function() {
             var server;
-            try {
-                $("#node-input-path").autocomplete("destroy");
-                $("#node-input-subpath").autocomplete("destroy");
-            }
-            catch (err){
-            }
-
-            $("#node-input-owserver").change( function(){
-                var serverConfigId = $("#node-input-owserver").val();
+            $('#node-input-owserver').change( function(){
+                var serverConfigId = $('#node-input-owserver').val();
                 server = RED.nodes.node(serverConfigId);
             });
 
-            $("#node-input-lookup-path").click(function(){
-                $("#node-input-lookup-path").addClass('disabled');
-                $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
-                $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
+            $('#node-input-path').focus(function(){
+                $('#node-input-subpath').val('');
                 $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/', function(data) {
-                    var temp = [];
-                    temp = data.slice();
-                    $("#node-input-path").autocomplete({
-                        source:temp,
+                    if(data[0].slice(0,5) == 'Error'){ $('#node-input-path').val(data[0]); }
+                    $('#node-input-path').autocomplete({
+                        source:data,
                         minLenght:0,
                         close: function( event , ui ){
-                            $("#node-input-path").autocomplete("destroy");
-                            $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
-                            $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
-                            $("#node-input-lookup-path").removeClass('disabled');
+                            $('#node-input-path').autocomplete('destroy');
+                            $('#node-input-subpath').focus();
                         }
-                    }).autocomplete("search","/");
+                    }).autocomplete('search','/');
                 });
             });
 
-            $("#node-input-lookup-subpath").click(function(){
-                var tempPath = $("#node-input-path").val();
-                $("#node-input-lookup-subpath").addClass('disabled');
-                $("#node-input-lookup-subpath-icon").removeClass('fa fa-ellipsis-h');
-                $("#node-input-lookup-subpath-icon").addClass('fa fa-pencil');
-                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + tempPath,function(data) {
-                    $("#node-input-lookup-subpath").removeClass('disabled');
-                    var temp = [];
-                    temp = data.slice();
-                    $("#node-input-subpath").autocomplete({
-                        source:temp,
+            $('#node-input-subpath').focus(function(){
+                if($('#node-input-path').val() == '/'){
+                    $('#node-input-subpath').val('Select ROMCode first!');
+                    $('#node-input-path').focus();
+                    return ;
+                }
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + $('#node-input-path').val(),function(data) {
+                    $('#node-input-subpath').autocomplete({
+                        source:data,
                         minLenght:0,
                         close: function( event , ui ){
-                            $("#node-input-subpath").autocomplete("destroy");
-                            $("#node-input-lookup-subpath-icon").removeClass('fa fa-pencil');
-                            $("#node-input-lookup-subpath-icon").addClass('fa fa-ellipsis-h');
-                            $("#node-input-lookup-subpath").removeClass('disabled');
+                            $('#node-input-subpath').autocomplete('destroy');
                         }
-                    }).autocomplete("search","/");
+                    }).autocomplete('search','/');
                 });
             });
         }
@@ -135,13 +116,11 @@
     </div>
     <div class="form-row">
         <label for="node-input-path"><i class="fa fa-cogs"></i> ROM Code</label>
-        <input type="text" id="node-input-path" style="width: 56%">
-        <a id="node-input-lookup-path" class="btn"><i id="node-input-lookup-path-icon" class="fa fa-ellipsis-h"></i></a>
+        <input type="text" id="node-input-path" placeholder="Click for lookup">
     </div>
     <div class="form-row">
         <label for="node-input-subpath"><i class="fa fa-sliders"></i> Property</label>
-        <input type="text" id="node-input-subpath" style="width: 56%">
-        <a id="node-input-lookup-subpath" class="btn"><i id="node-input-lookup-subpath-icon" class="fa fa-ellipsis-h"></i></a>
+        <input type="text" id="node-input-subpath" placeholder="Select property">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -155,7 +134,7 @@
    <p> include device id and property,</p>
    <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
    <p><b>msg.payload</b> result of operation,</p>
-   <p>if this < 0 , operation failed.</p>
+   <p>boolean true and false.</p>
 </script>
 
 <script type="text/javascript">
@@ -175,57 +154,40 @@
         label: function() { return this.name || (this.path + this.subpath); },
         oneditprepare: function(){
             var server;
-            try {
-                $("#node-input-path").autocomplete("destroy");
-                $("#node-input-subpath").autocomplete("destroy");
-            }
-            catch (err){
-            }
-
-            $("#node-input-owserver").change( function(){
-                var serverConfigId = $("#node-input-owserver").val();
+            $('#node-input-owserver').change( function(){
+                var serverConfigId = $('#node-input-owserver').val();
                 server = RED.nodes.node(serverConfigId);
             });
 
-            $("#node-input-lookup-path").click(function(){
-                $("#node-input-lookup-path").addClass('disabled');
-                $("#node-input-lookup-path-icon").removeClass('fa fa-ellipsis-h');
-                $("#node-input-lookup-path-icon").addClass('fa fa-pencil');
+            $('#node-input-path').focus(function(){
+                $('#node-input-subpath').val('');
                 $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/', function(data) {
-                    var temp = [];
-                    temp = data.slice();
-                    $("#node-input-path").autocomplete({
-                        source:temp,
+                    if(data[0].slice(0,5) == 'Error'){ $('#node-input-path').val(data[0]); }
+                    $('#node-input-path').autocomplete({
+                        source:data,
                         minLenght:0,
                         close: function( event , ui ){
-                            $("#node-input-path").autocomplete("destroy");
-                            $("#node-input-lookup-path-icon").removeClass('fa fa-pencil');
-                            $("#node-input-lookup-path-icon").addClass('fa fa-ellipsis-h');
-                            $("#node-input-lookup-path").removeClass('disabled');
+                            $('#node-input-path').autocomplete('destroy');
+                            $('#node-input-subpath').focus();
                         }
-                    }).autocomplete("search","/");
+                    }).autocomplete('search','/');
                 });
             });
 
-            $("#node-input-lookup-subpath").click(function(){
-                var tempPath = $("#node-input-path").val();
-                $("#node-input-lookup-subpath").addClass('disabled');
-                $("#node-input-lookup-subpath-icon").removeClass('fa fa-ellipsis-h');
-                $("#node-input-lookup-subpath-icon").addClass('fa fa-pencil');
-                $.getJSON('ownet/ls/' + server.host + '/' + server.port + '/' + tempPath,function(data) {
-                    $("#node-input-lookup-subpath").removeClass('disabled');
-                    var temp = [];
-                    temp = data.slice();
-                    $("#node-input-subpath").autocomplete({
-                        source:temp,
+            $('#node-input-subpath').focus(function(){
+                if($('#node-input-path').val() == '/'){
+                    $('#node-input-subpath').val('Select ROMCode first!');
+                    $('#node-input-path').focus();
+                    return ;
+                }
+                $.getJSON('ownet/ls/' + server.host + '/' + server.port + $('#node-input-path').val(),function(data) {
+                    $('#node-input-subpath').autocomplete({
+                        source:data,
                         minLenght:0,
                         close: function( event , ui ){
-                            $("#node-input-subpath").autocomplete("destroy");
-                            $("#node-input-lookup-subpath-icon").removeClass('fa fa-pencil');
-                            $("#node-input-lookup-subpath-icon").addClass('fa fa-ellipsis-h');
-                            $("#node-input-lookup-subpath").removeClass('disabled');
+                            $('#node-input-subpath').autocomplete('destroy');
                         }
-                    }).autocomplete("search","/");
+                    }).autocomplete('search','/');
                 });
             });
         }

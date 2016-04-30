@@ -5,6 +5,8 @@
 *.pid
 *.gz
 
+t.js
+
 logs
 results
 
