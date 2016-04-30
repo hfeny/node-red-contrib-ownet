@@ -76,8 +76,6 @@ module.exports = function(RED) {
             var list = [];
             if(data[0].slice(0,5) == 'Error'){
                 list.push(data[0]);
-                //res.json(list);
-                //return ;
             } else {
                 data = data.sort().slice();
                 var excluded_subpaths = new RegExp("/(?:address|crc8|errata|family|id|locator|scratchpad|r_[a-z]+)$");
