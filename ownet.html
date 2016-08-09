@@ -44,11 +44,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="ownet-read">
-   <p>Read value from 1-wire device over owserver(owfs.org).</p>
+   <p>Read value from 1-wire device over ownet.</p>
    <p>Output <b>msg.topic</b> containing owfs path,</p>
    <p> include device id and property,</p>
    <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
-   <p><b>msg.payload</b> containing value as string.</p>
+   <p> <b>msg.payload</b> containing value as string.</p>
 </script>
 
 <script type="text/javascript">
@@ -63,7 +63,7 @@
         color:      '#169cf5',
         inputs:     1,
         outputs:    1,
-        icon:	    'arrow-in.png',
+        icon:	    'arrow-out.png',
         align:	    'right',
         label: function() { return this.name || (this.path + this.subpath); },
         oneditprepare: function() {
@@ -129,12 +129,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="ownet-read">
-   <p>Write value to 1-wire device over owserver(owfs.org).</p>
+   <p>Write value to 1-wire device over ownet.</p>
    <p>Output <b>msg.topic</b> containing owfs path,</p>
    <p> include device id and property,</p>
    <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
-   <p><b>msg.payload</b> result of operation,</p>
-   <p>boolean true and false.</p>
+   <p> <b>msg.payload</b> result of operation,</p>
+   <p> boolean true or false.</p>
 </script>
 
 <script type="text/javascript">
@@ -146,11 +146,11 @@
             name: 				{ value:'' }
         },
         category:   'ownet',
-        color:      '#f54616',
+        color:      '#fd5f46',
         inputs:     1,
         outputs:    1,
         icon:	    'arrow-in.png',
-        align:	    'right',
+        align:	    'left',
         label: function() { return this.name || (this.path + this.subpath); },
         oneditprepare: function(){
             var server;
