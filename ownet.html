@@ -38,17 +38,21 @@
         <input type="text" id="node-input-subpath" placeholder="Select property">
     </div>
     <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tag"></i> msg.topic</label>
+        <input type="text" id="node-input-topic" placeholder="msg.topic">
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="ownet-read">
-   <p>Read value from 1-wire device over ownet.</p>
-   <p>Output <b>msg.topic</b> containing owfs path,</p>
-   <p> include device id and property,</p>
-   <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
-   <p> <b>msg.payload</b> containing value as string.</p>
+   <p>Read value from 1-wire device over ownet.<br>
+   Output <b>msg.topic</b> containing owfs path,<br>
+    include device id and property,<br>
+    <b>ex</b> /28.97CA2E020000/temperature9<br>
+    <b>msg.payload</b> containing value as string.</p>
 </script>
 
 <script type="text/javascript">
@@ -57,10 +61,11 @@
             owserver:           { value:'', type: 'owserver' },
             path:			    { value:'/', required:true },
             subpath:			{ value:'', required:true },
+            topic: 				{ value:'' },
             name: 				{ value:'' }
         },
         category:   'ownet',
-        color:      '#169cf5',
+        color:      '#5daa98',
         inputs:     1,
         outputs:    1,
         icon:	    'arrow-out.png',
@@ -123,18 +128,22 @@
         <input type="text" id="node-input-subpath" placeholder="Select property">
     </div>
     <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tag"></i> msg.topic</label>
+        <input type="text" id="node-input-topic" placeholder="msg.topic">
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="ownet-read">
-   <p>Write value to 1-wire device over ownet.</p>
-   <p>Output <b>msg.topic</b> containing owfs path,</p>
-   <p> include device id and property,</p>
-   <p> <b>ex</b> /28.97CA2E020000/temperature9</p>
-   <p> <b>msg.payload</b> result of operation,</p>
-   <p> boolean true or false.</p>
+<script type="text/x-red" data-help-name="ownet-write">
+   <p>Write value to 1-wire device over ownet.<br>
+   Output <b>msg.topic</b> containing owfs path,<br>
+    include device id and property,<br>
+    <b>ex</b> /28.97CA2E020000/temperature9<br>
+    <b>msg.payload</b> result of operation,<br>
+    boolean true or false.</p>
 </script>
 
 <script type="text/javascript">
@@ -143,10 +152,11 @@
             owserver:           { value:'', type: 'owserver' },
             path:			    { value:'', required:true },
             subpath:			{ value:'', required:true },
+            topic: 				{ value:'' },
             name: 				{ value:'' }
         },
         category:   'ownet',
-        color:      '#fd5f46',
+        color:      '#e9564b',
         inputs:     1,
         outputs:    1,
         icon:	    'arrow-in.png',
