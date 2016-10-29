@@ -42,17 +42,23 @@
         <input type="text" id="node-input-topic" placeholder="msg.topic">
     </div>
     <div class="form-row">
+        <label for="node-input-title"><i class="fa fa-tag"></i> msg.title</label>
+        <input type="text" id="node-input-title" placeholder="msg.title">
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="ownet-read">
-   <p>Read value from 1-wire device over ownet.<br>
-   Output <b>msg.topic</b> containing owfs path,<br>
-    include device id and property,<br>
-    <b>ex</b> /28.97CA2E020000/temperature9<br>
-    <b>msg.payload</b> containing value as string.</p>
+    <p>Read value from 1-wire device over ownet.</p>
+    <p><code>msg.topic</code> containing owfs path,
+    include device id and property,
+    <b>ex</b> /28.97CA2E020000/temperature9,
+    or user defined topic value.</p>
+    <p><code>msg.payload</code> containing value as string.</p>
+    <p><code>msg.title</code>containing free user text for use in next node.</p>
 </script>
 
 <script type="text/javascript">
@@ -62,6 +68,7 @@
             path:			    { value:'/', required:true },
             subpath:			{ value:'', required:true },
             topic: 				{ value:'' },
+            title: 				{ value:'' },
             name: 				{ value:'' }
         },
         category:   'ownet',
@@ -138,11 +145,11 @@
 </script>
 
 <script type="text/x-red" data-help-name="ownet-write">
-   <p>Write value to 1-wire device over ownet.<br>
-   Output <b>msg.topic</b> containing owfs path,<br>
-    include device id and property,<br>
-    <b>ex</b> /28.97CA2E020000/temperature9<br>
-    <b>msg.payload</b> result of operation,<br>
+    <p>Write value to 1-wire device over ownet.</p>
+    <p><code>msg.topic</code> containing owfs path,
+    include device id and property,
+    <b>ex</b> /28.97CA2E020000/temperature9</p>
+    <p><code>msg.payload</code> result of operation,
     boolean true or false.</p>
 </script>
 

@@ -23,6 +23,7 @@ module.exports = function(RED) {
             this.path = n.path;
             this.subpath = n.subpath;
             this.topic = n.topic;
+            this.title = n.title;
             //this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
             this.status({fill:"green",shape:"dot",text:'connected'});
         } else {
