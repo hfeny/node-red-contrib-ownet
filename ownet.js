@@ -24,24 +24,16 @@ module.exports = function(RED) {
             this.subpath = n.subpath;
             this.topic = n.topic;
             this.title = n.title;
-            //this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
             this.status({fill:"green",shape:"dot",text:'connected'});
         } else {
-            //this.status({fill:"red",shape:"dot",text:"server not set"});
-            this.status({fill:"red",shape:"dot",text:'config not ok'});
+            this.status({fill:"red",shape:"dot",text:'no connection'});
         }
         var node = this;
         node.on('input', function (msg) {
             var owserver = new ownet.owserver(node.host, node.port);
             owserver.read(node.path + node.subpath, function(res) {
                 msg.topic = node.topic || (node.path + node.subpath);
-                /*
-                if(isNumber(+res)!==false){
-                    msg.payload = +res;
-                } else {
-                    msg.payload = null;
-                }
-                */
+                msg.title = node.title || msg.title;
                 msg.payload = res;
                 node.send(msg);
             })
@@ -59,11 +51,9 @@ module.exports = function(RED) {
             this.path = n.path;
             this.subpath = n.subpath;
             this.topic = n.topic;
-            //this.status({fill:"green",shape:"dot",text:this.host + ':' + this.port});
             this.status({fill:"green",shape:"dot",text:'connected'});
         } else {
-            //this.status({fill:"red",shape:"dot",text:"server not set"});
-            this.status({fill:"red",shape:"dot",text:'config not ok'});
+            this.status({fill:"red",shape:"dot",text:'no connection'});
         }
         var node = this;
         node.on('input', function (msg) {
